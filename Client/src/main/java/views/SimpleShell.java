@@ -5,18 +5,41 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import controllers.IdController;
 import controllers.MessageController;
 
-// Simple Shell is a Console view for YouAreEll.
+// Simple Shell is a Console view for views.YouAreEll.
 public class SimpleShell {
 
 
     public static void prettyPrint(String output) {
         // yep, make an effort to format things nicely, eh?
-        System.out.println(output);
+
+        output = output.replace("[", "").replace("]","").replace("{","");
+
+        Integer indexInitial = 0, indexFinal;
+
+        Integer outputLength = output.length();
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("------------------------------\n");
+
+        for (int i = 0; ; i++) {
+            if (  outputLength < indexInitial ) {
+                break;
+            }
+            indexFinal = indexInitial + output.substring(indexInitial).indexOf("}");
+            sb.append("----------" + " Entry: " + (i + 1) + " ----------\n");
+            sb.append( output.substring(indexInitial, indexFinal).replace(",","\n") + "\n" );
+            indexInitial = indexFinal + 2;
+        }
+        sb.append("------------------------------\n");
+        System.out.println(sb.toString());
+
     }
     public static void main(String[] args) throws java.io.IOException {
 
@@ -51,9 +74,8 @@ public class SimpleShell {
             for (int i = 0; i < commands.length; i++) {
                 //System.out.println(commands[i]); //***check to see if parsing/split worked***
                 list.add(commands[i]);
-
             }
-            System.out.print(list); //***check to see if list was added correctly***
+            System.out.println("list: " + list); //***check to see if list was added correctly***
             history.addAll(list);
             try {
                 //display history of shell with index
@@ -63,19 +85,31 @@ public class SimpleShell {
                     continue;
                 }
 
-                // Specific Commands.
+                /**
+                 *  Specific Commands.
+                 */
 
-                // ids
-                if (list.contains("ids")) {
+                // ids - GET
+                if (list.contains("ids") && list.size() == 1) {
+//                if (list.contains("i")) {
                     String results = webber.get_ids();
+                    SimpleShell.prettyPrint(results);
+                    continue;
+                }
+
+                // ids - POST
+                if (list.contains("ids") && list.size() == 3){
+                    String results = webber.post_ids(list.get(1) + " " + list.get(2) );
                     SimpleShell.prettyPrint(results);
                     continue;
                 }
 
                 // messages
                 if (list.contains("messages")) {
+//                if (list.contains("m")) {
                     String results = webber.get_messages();
                     SimpleShell.prettyPrint(results);
+                    System.out.println("-----------");
                     continue;
                 }
                 // you need to add a bunch more.
